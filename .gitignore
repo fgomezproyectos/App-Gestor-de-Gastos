@@ -1,3 +1,12 @@
-echo "gastos.db" > .gitignore
-echo "__pycache__/" >> .gitignore
-echo "*.pyc" >> .gitignore
+# Archivos y directorios a ignorar por Git:
+# 1. Base de datos local (nunca debe subirse al hosting gratuito)
+gastos.db
+
+# 2. Archivos de caché de Python (temporales)
+__pycache__/
+*.pyc
+
+# Apliación
+venv/
+.app/
+.env
