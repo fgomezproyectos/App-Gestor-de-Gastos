@@ -1,41 +1,60 @@
 from flask import Flask, render_template, request, redirect, url_for
-import sqlite3
+import os
+import psycopg2 # Librería para conectar con PostgreSQL
+from dotenv import load_dotenv
+
+# Carga las variables de entorno (solo para desarrollo local)
+load_dotenv()
 
 # Inicializa Flask
 app = Flask(__name__)
-# Usamos un nombre de archivo de BD temporal o persistente
-# Render creará este archivo en el inicio
-NOMBRE_BASE_DATOS = 'gastos.db' 
 
 # --- Lógica de la Base de Datos ---
+
+# 1. Obtener la URL de conexión. Render utiliza la variable de entorno 'DATABASE_URL'.
+DATABASE_URL = os.environ.get('DATABASE_URL') 
+if not DATABASE_URL:
+    # Esto asegura que si no encuentra la variable (en Render o en local), la app falle
+    raise Exception("Error: La variable DATABASE_URL no está configurada. Debe configurarse en Render.")
+
 def get_db_connection():
-    conn = sqlite3.connect(NOMBRE_BASE_DATOS)
-    conn.row_factory = sqlite3.Row # Permite acceder a las columnas por nombre
+    """Establece y devuelve la conexión a PostgreSQL."""
+    # Reemplazamos 'postgresql://' por 'postgres://' si es necesario, 
+    # ya que psycopg2 a veces lo requiere.
+    conn = psycopg2.connect(DATABASE_URL.replace('postgresql://', 'postgres://'))
     return conn
 
 def inicializar_bd():
     """
     Crea la tabla 'gastos' si no existe. 
-    Esto es CRUCIAL para el despliegue en la nube, donde la base de datos es efímera.
+    Esto se ejecutará en el primer arranque en Render para crear la tabla.
     """
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # Consulta SQL para crear la tabla si NO existe
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS gastos (
-            id INTEGER PRIMARY KEY,
-            descripcion TEXT NOT NULL,
-            monto REAL NOT NULL
-        )
-    """)
-    conn.commit()
-    conn.close()
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # El tipo SERIAL es la clave primaria con auto-incremento
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS gastos (
+                id SERIAL PRIMARY KEY,
+                descripcion TEXT NOT NULL,
+                monto NUMERIC(10, 2) NOT NULL
+            );
+        """)
+        conn.commit()
+    except Exception as e:
+        print(f"Error al inicializar la BD: {e}")
+    finally:
+        if conn:
+            conn.close()
 
-# --- Rutas de la Aplicación Web ---
+# --- Rutas de la Aplicación Web (Actualizadas para usar PostgreSQL) ---
 
 @app.route('/', methods=('GET', 'POST'))
 def index():
     conn = get_db_connection()
+    cursor = conn.cursor()
     
     # --- Manejar la adición de un gasto (POST) ---
     if request.method == 'POST':
@@ -45,11 +64,11 @@ def index():
         if descripcion and monto_str:
             try:
                 monto_float = float(monto_str)
-                conn.execute("INSERT INTO gastos (descripcion, monto) VALUES (?, ?)", 
+                # Usar %s como marcador de posición para psycopg2
+                cursor.execute("INSERT INTO gastos (descripcion, monto) VALUES (%s, %s)", 
                              (descripcion, monto_float))
                 conn.commit()
             except ValueError:
-                # En un entorno real, manejarías el error de manera más amigable
                 print("Error: El monto no es un número válido.")
             except Exception as e:
                 print(f"Error al insertar en BD: {e}")
@@ -58,11 +77,24 @@ def index():
         return redirect(url_for('index'))
     
     # --- Obtener gastos y total (GET) ---
-    # Ordenamos por ID descendente para ver los nuevos primero
-    gastos = conn.execute("SELECT * FROM gastos ORDER BY id DESC").fetchall()
     
-    # Calcular el total
-    total = sum(gasto['monto'] for gasto in gastos)
+    # Obtener todas las filas (ordenadas por ID descendente)
+    cursor.execute("SELECT id, descripcion, monto FROM gastos ORDER BY id DESC")
+    raw_gastos = cursor.fetchall()
+    
+    # Procesar los gastos para la plantilla
+    gastos = []
+    total = 0.0
+    for row in raw_gastos:
+        # Los resultados de cursor.fetchall() son tuplas, los mapeamos por índice
+        gasto = {
+            'id': row[0],
+            'descripcion': row[1],
+            # Convertir de Decimal de Postgres a float/numérico para sumar
+            'monto': float(row[2]) 
+        }
+        gastos.append(gasto)
+        total += gasto['monto']
     
     conn.close()
     
@@ -71,53 +103,57 @@ def index():
 @app.route('/modificar/<int:id>', methods=('GET', 'POST'))
 def modificar(id):
     conn = get_db_connection()
-    gasto = conn.execute('SELECT * FROM gastos WHERE id = ?', (id,)).fetchone()
+    cursor = conn.cursor()
     
-    if gasto is None:
+    # Usamos %s como marcador de posición
+    cursor.execute('SELECT id, descripcion, monto FROM gastos WHERE id = %s', (id,))
+    raw_gasto = cursor.fetchone()
+    
+    if raw_gasto is None:
         conn.close()
-        return "Gasto no encontrado", 404 # Devuelve error si la ID no existe
+        return "Gasto no encontrado", 404
+        
+    gasto = {
+        'id': raw_gasto[0],
+        'descripcion': raw_gasto[1],
+        'monto': float(raw_gasto[2]) 
+    }
     
-    # Si la solicitud es GET, simplemente mostramos la plantilla con los datos
     if request.method == 'GET':
         conn.close()
-        # Renderiza la plantilla: 'modificar.html'
         return render_template('modificar.html', gasto=gasto)
-
-    # Si la solicitud es POST, guardamos los cambios en la BD
+    
     elif request.method == 'POST':
         descripcion = request.form['descripcion']
         monto_str = request.form['monto']
         
         try:
             monto_float = float(monto_str)
-            # Consulta SQL para actualizar la fila
-            conn.execute('UPDATE gastos SET descripcion = ?, monto = ? WHERE id = ?',
+            
+            cursor.execute('UPDATE gastos SET descripcion = %s, monto = %s WHERE id = %s',
                          (descripcion, monto_float, id))
             conn.commit()
             
             conn.close()
-            # Redirige a la página principal después de modificar
             return redirect(url_for('index'))
             
         except ValueError:
             conn.close()
-            # Si el monto es inválido, vuelve a mostrar el formulario con el error
             return render_template('modificar.html', gasto=gasto, error="Monto inválido.")
 
 @app.route('/eliminar/<int:id>', methods=('POST',))
 def eliminar(id):
     conn = get_db_connection()
+    cursor = conn.cursor()
     
-    # Consulta SQL para eliminar la fila por ID
-    conn.execute("DELETE FROM gastos WHERE id = ?", (id,))
+    cursor.execute("DELETE FROM gastos WHERE id = %s", (id,))
     conn.commit()
     
     conn.close() 
     
     return redirect(url_for('index'))
 
-# --- Inicio de la Aplicación (Ajustado para Despliegue) ---
 if __name__ == '__main__':
-    inicializar_bd()
-    # Cambiamos host a '0.0.0.0' para que sea accesible en tu red local si pruebas antes de Render
-    app.run(host='0.0.0.0', port=5000, debug=True) 
+    # Inicializa la BD solo cuando el script se ejecuta directamente
+    inicializar_bd() 
+    app.run(debug=True)
