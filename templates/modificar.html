@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificar Gasto #{{ gasto['id'] }}</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --bg-light: #f8f9fa;
+            --text-dark: #212529;
+            --card-bg: white;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .container h1 {
+            color: var(--primary-color);
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        input[type="text"], 
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .actions {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-submit, .btn-cancel {
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            border: none;
+            text-align: center;
+            flex-grow: 1;
+            margin: 0 5px;
+        }
+
+        .btn-submit {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #1e7e34;
+        }
+
+        .btn-cancel {
+            background-color: var(--secondary-color);
+            color: white;
+            line-height: 1.5; /* Asegura que el texto y el botón sean del mismo tamaño */
+        }
+
+        .btn-cancel:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✏️ Modificar Gasto #{{ gasto['id'] }}</h1>
+
+        {% if error %}
+            <p style="color: var(--danger-color); text-align: center;">Error: {{ error }}</p>
+        {% endif %}
+
+        <form method="post">
+            
+            <label for="descripcion">Descripción</label>
+            <input type="text" name="descripcion" value="{{ gasto['descripcion'] }}" required>
+            
+            <label for="monto">Monto ($)</label>
+            <input type="number" name="monto" step="0.01" value="{{ '%.2f' | format(gasto['monto']) }}" required>
+            
+            <div class="actions">
+                <button type="submit" class="btn-submit">Guardar Cambios</button>
+                <a href="{{ url_for('index') }}" class="btn-cancel">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

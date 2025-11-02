@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Gastos - Dashboard</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --bg-light: #f8f9fa;
+            --bg-dark: #343a40;
+            --text-dark: #212529;
+            --text-light: #f8f9fa;
+            --card-bg: white;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex;
+        }
+
+        /* Contenedor Principal */
+        .dashboard {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Barra Lateral (Formulario y Análisis) */
+        .sidebar {
+            width: 300px;
+            padding: 20px;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2, .sidebar h1 {
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar label {
+            display: block;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .sidebar input[type="text"], 
+        .sidebar input[type="number"], 
+        .sidebar button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid #ccc;
+            box-sizing: border-box; /* Importante para que el padding no desborde */
+        }
+
+        .sidebar button {
+            background-color: var(--success-color);
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar button:hover {
+            background-color: #1e7e34;
+        }
+
+        /* Contenido Principal (Tabla) */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+        }
+
+        .main-content h1 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+        }
+
+        /* Tarjeta de Total */
+        .total-card {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-card span {
+            font-size: 2.5em;
+            font-weight: bold;
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* Estilo de la Tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background-color: var(--secondary-color);
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        tr:hover {
+            background-color: #e9ecef;
+        }
+
+        /* Botones de Acción */
+        .btn-modificar, .btn-eliminar {
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+
+        .btn-modificar {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-modificar:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-eliminar {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            margin-left: 5px;
+        }
+
+        .btn-eliminar:hover {
+            background-color: #bd2130;
+        }
+        
+        /* Aseguramos que el formulario de eliminar sea inline */
+        .action-form {
+            display: inline-block;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Estilos para el Análisis Rápido */
+        .analysis-card {
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .analysis-card p {
+            margin: 5px 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        
+        <div class="sidebar">
+            <h1>Gestor de Gastos</h1>
+
+            <h2>💰 Nuevo Gasto</h2>
+            <form method="post">
+                <label for="descripcion">Descripción</label>
+                <input type="text" name="descripcion" placeholder="Ej: Café, Transporte..." required>
+                
+                <label for="monto">Monto ($)</label>
+                <input type="number" name="monto" step="0.01" placeholder="Ej: 5.50" required>
+                
+                <button type="submit">Añadir Gasto</button>
+            </form>
+
+            <hr style="border-color: var(--secondary-color);">
+
+            <h2>🚀 Análisis Rápido</h2>
+            <div class="analysis-card">
+                {% if total is defined %}
+                <p>Total Registrado: <strong>${{ "%.2f" | format(total) }}</strong></p>
+                {% else %}
+                <p>Añade gastos para ver las estadísticas.</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="main-content">
+            <h1>📊 Resumen de Transacciones</h1>
+
+            {% if total is defined %}
+            <div class="total-card">
+                Total Gastado: 
+                <span>${{ "%.2f" | format(total) }}</span>
+            </div>
+            {% endif %}
+
+            {% if gastos %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Descripción</th>
+                        <th>Monto</th>
+                        <th>Acciones</th> 
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for gasto in gastos %}
+                    <tr>
+                        <td>{{ gasto['id'] }}</td>
+                        <td>{{ gasto['descripcion'] }}</td>
+                        <td>${{ "%.2f" | format(gasto['monto']) }}</td>
+                        <td>
+                            <a href="{{ url_for('modificar', id=gasto['id']) }}" class="btn-modificar">Modificar</a>
+                            
+                            <form method="POST" action="{{ url_for('eliminar', id=gasto['id']) }}" class="action-form">
+                                <input type="submit" value="Eliminar" class="btn-eliminar" onclick="return confirm('¿Estás seguro de que quieres eliminar este gasto?');">
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>💡 ¡Tu lista de gastos está vacía! Usa el formulario lateral para empezar.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

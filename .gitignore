@@ -1,0 +1,3 @@
+echo "gastos.db" > .gitignore
+echo "__pycache__/" >> .gitignore
+echo "*.pyc" >> .gitignore
