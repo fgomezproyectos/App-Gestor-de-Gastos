@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 import os
-import psycopg2 # Librería para conectar con PostgreSQL
+import psycopg2 
 from dotenv import load_dotenv
 
 # Carga las variables de entorno (solo para desarrollo local)
@@ -11,24 +11,17 @@ app = Flask(__name__)
 
 # --- Lógica de la Base de Datos ---
 
-# 1. Obtener la URL de conexión. Render utiliza la variable de entorno 'DATABASE_URL'.
 DATABASE_URL = os.environ.get('DATABASE_URL') 
 if not DATABASE_URL:
-    # Esto asegura que si no encuentra la variable (en Render o en local), la app falle
     raise Exception("Error: La variable DATABASE_URL no está configurada. Debe configurarse en Render.")
 
 def get_db_connection():
     """Establece y devuelve la conexión a PostgreSQL."""
-    # Reemplazamos 'postgresql://' por 'postgres://' si es necesario, 
-    # ya que psycopg2 a veces lo requiere.
     conn = psycopg2.connect(DATABASE_URL.replace('postgresql://', 'postgres://'))
     return conn
 
 def inicializar_bd():
-    """
-    Crea la tabla 'gastos' si no existe. 
-    Esto se ejecutará en el primer arranque en Render para crear la tabla.
-    """
+    """Crea la tabla 'gastos' si no existe."""
     conn = None
     try:
         conn = get_db_connection()
@@ -43,13 +36,19 @@ def inicializar_bd():
             );
         """)
         conn.commit()
+        print("INFO: Tabla 'gastos' verificada/creada exitosamente.") # Añadimos un log
     except Exception as e:
         print(f"Error al inicializar la BD: {e}")
     finally:
         if conn:
             conn.close()
 
-# --- Rutas de la Aplicación Web (Actualizadas para usar PostgreSQL) ---
+# ESTA LÍNEA ES EL ARREGLO (FIX):
+# Ejecutamos la función de inicialización justo después de definir la aplicación 'app'.
+# Esto asegura que la tabla exista antes de que cualquier ruta (como index) intente acceder a ella.
+inicializar_bd()
+
+# --- Rutas de la Aplicación Web ---
 
 @app.route('/', methods=('GET', 'POST'))
 def index():
@@ -64,7 +63,6 @@ def index():
         if descripcion and monto_str:
             try:
                 monto_float = float(monto_str)
-                # Usar %s como marcador de posición para psycopg2
                 cursor.execute("INSERT INTO gastos (descripcion, monto) VALUES (%s, %s)", 
                              (descripcion, monto_float))
                 conn.commit()
@@ -78,7 +76,6 @@ def index():
     
     # --- Obtener gastos y total (GET) ---
     
-    # Obtener todas las filas (ordenadas por ID descendente)
     cursor.execute("SELECT id, descripcion, monto FROM gastos ORDER BY id DESC")
     raw_gastos = cursor.fetchall()
     
@@ -86,11 +83,9 @@ def index():
     gastos = []
     total = 0.0
     for row in raw_gastos:
-        # Los resultados de cursor.fetchall() son tuplas, los mapeamos por índice
         gasto = {
             'id': row[0],
             'descripcion': row[1],
-            # Convertir de Decimal de Postgres a float/numérico para sumar
             'monto': float(row[2]) 
         }
         gastos.append(gasto)
@@ -105,7 +100,6 @@ def modificar(id):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Usamos %s como marcador de posición
     cursor.execute('SELECT id, descripcion, monto FROM gastos WHERE id = %s', (id,))
     raw_gasto = cursor.fetchone()
     
@@ -154,6 +148,5 @@ def eliminar(id):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    # Inicializa la BD solo cuando el script se ejecuta directamente
-    inicializar_bd() 
+    # No es necesario inicializar_bd() aquí porque ya lo hacemos fuera del bloque
     app.run(debug=True)
