@@ -2,7 +2,9 @@ from flask import Flask, render_template, request, redirect, url_for
 import os
 import psycopg2 
 from dotenv import load_dotenv
+from datetime import datetime 
 
+#https://gastos-1fzb.onrender.com/
 # Carga las variables de entorno (solo para desarrollo local)
 load_dotenv()
 
@@ -21,31 +23,30 @@ def get_db_connection():
     return conn
 
 def inicializar_bd():
-    """Crea la tabla 'gastos' si no existe."""
+    """Crea la tabla 'gastos' si no existe, incluyendo la columna de fecha."""
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # El tipo SERIAL es la clave primaria con auto-incremento
+        # Sentencia SQL con la columna fecha_creacion
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS gastos (
                 id SERIAL PRIMARY KEY,
                 descripcion TEXT NOT NULL,
-                monto NUMERIC(10, 2) NOT NULL
+                monto NUMERIC(10, 2) NOT NULL,
+                fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
         """)
         conn.commit()
-        print("INFO: Tabla 'gastos' verificada/creada exitosamente.") # Añadimos un log
+        print("INFO: Tabla 'gastos' verificada/creada exitosamente.")
     except Exception as e:
         print(f"Error al inicializar la BD: {e}")
     finally:
         if conn:
             conn.close()
 
-# ESTA LÍNEA ES EL ARREGLO (FIX):
-# Ejecutamos la función de inicialización justo después de definir la aplicación 'app'.
-# Esto asegura que la tabla exista antes de que cualquier ruta (como index) intente acceder a ella.
+# Ejecutamos la función de inicialización.
 inicializar_bd()
 
 # --- Rutas de la Aplicación Web ---
@@ -63,6 +64,7 @@ def index():
         if descripcion and monto_str:
             try:
                 monto_float = float(monto_str)
+                # La fecha se inserta automáticamente por el DEFAULT de la BD
                 cursor.execute("INSERT INTO gastos (descripcion, monto) VALUES (%s, %s)", 
                              (descripcion, monto_float))
                 conn.commit()
@@ -76,17 +78,22 @@ def index():
     
     # --- Obtener gastos y total (GET) ---
     
-    cursor.execute("SELECT id, descripcion, monto FROM gastos ORDER BY id DESC")
+    # Seleccionamos la nueva columna fecha_creacion
+    cursor.execute("SELECT id, descripcion, monto, fecha_creacion FROM gastos ORDER BY id DESC")
     raw_gastos = cursor.fetchall()
     
     # Procesar los gastos para la plantilla
     gastos = []
     total = 0.0
     for row in raw_gastos:
+        # Formateamos la fecha (que está en row[3])
+        fecha_formateada = row[3].strftime('%Y-%m-%d %H:%M') if row[3] else 'N/A'
+
         gasto = {
             'id': row[0],
             'descripcion': row[1],
-            'monto': float(row[2]) 
+            'monto': float(row[2]), 
+            'fecha': fecha_formateada # Se añade al diccionario
         }
         gastos.append(gasto)
         total += gasto['monto']
@@ -100,7 +107,8 @@ def modificar(id):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT id, descripcion, monto FROM gastos WHERE id = %s', (id,))
+    # Seleccionamos fecha_creacion para mostrarla si es necesario
+    cursor.execute('SELECT id, descripcion, monto, fecha_creacion FROM gastos WHERE id = %s', (id,))
     raw_gasto = cursor.fetchone()
     
     if raw_gasto is None:
@@ -110,7 +118,8 @@ def modificar(id):
     gasto = {
         'id': raw_gasto[0],
         'descripcion': raw_gasto[1],
-        'monto': float(raw_gasto[2]) 
+        'monto': float(raw_gasto[2]),
+        'fecha': raw_gasto[3].strftime('%Y-%m-%d %H:%M') if raw_gasto[3] else 'N/A'
     }
     
     if request.method == 'GET':
@@ -148,5 +157,4 @@ def eliminar(id):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    # No es necesario inicializar_bd() aquí porque ya lo hacemos fuera del bloque
     app.run(debug=True)

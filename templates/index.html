@@ -234,6 +234,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th>Fecha</th> <!-- ⬅️ NUEVA COLUMNA -->
                         <th>ID</th>
                         <th>Descripción</th>
                         <th>Monto</th>
@@ -243,6 +244,7 @@
                 <tbody>
                     {% for gasto in gastos %}
                     <tr>
+                        <td>{{ gasto['fecha'] }}</td> <!-- ⬅️ NUEVO CAMPO -->
                         <td>{{ gasto['id'] }}</td>
                         <td>{{ gasto['descripcion'] }}</td>
                         <td>${{ "%.2f" | format(gasto['monto']) }}</td>
