@@ -54,12 +54,11 @@
           {% if gastos %}
           <table role="table" aria-label="Lista de gastos">
             <thead>
-              <tr><th>ID</th><th>Descripción</th><th>Monto</th><th>Fecha</th><th>Acciones</th></tr>
+              <tr><th>Descripción</th><th>Monto</th><th>Fecha</th><th>Acciones</th></tr>
             </thead>
             <tbody>
               {% for g in gastos %}
               <tr>
-                <td>{{ g.id }}</td>
                 <td style="max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.descripcion }}</td>
                 <td>{{ "%.2f"|format(g.monto) }} €</td>
                 <td>{{ g.fecha }}</td>
@@ -114,13 +113,6 @@
         </div>
 
         <div style="height:12px"></div>
-
-        <div class="card">
-          <h4 style="margin:0 0 8px">Cuenta</h4>
-          <div class="muted">Usuario:</div>
-          <div style="font-weight:700;margin-bottom:8px">{{ user }}</div>
-          <a class="link" href="{{ url_for('logout') }}">Cerrar sesión</a>
-        </div>
       </aside>
     </div>
   </main>
