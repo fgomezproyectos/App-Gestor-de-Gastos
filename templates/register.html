@@ -4,13 +4,18 @@
   <meta charset="utf-8">
   <title>Registrar — Gestor de gastos</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icono.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icono.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
   <div class="center">
     <div class="card-auth" role="main" aria-labelledby="reg-title">
+      <div style="text-align:center;margin-bottom:16px">
+        <img src="{{ url_for('static', filename='images/icono.png') }}" alt="Logo Gestor" style="width:84px;height:84px;object-fit:contain">
+      </div>
       <h1 id="reg-title">Crear cuenta</h1>
-      <p class="lead">Registra un usuario para trabajar en local</p>
+      <p class="lead">Registra un usuario para empezar</p>
 
       {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -34,7 +39,6 @@
 
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
           <button class="btn-primary" type="submit">Crear cuenta</button>
-          <a class="muted" href="{{ url_for('login') }}">Volver al inicio</a>
         </div>
       </form>
     </div>

@@ -223,7 +223,7 @@ p.lead{
 
 .foot{
   margin-top:14px;
-  display:flex;
+  text-align: center;
   justify-content:space-between;
   align-items:center;
   flex-wrap:wrap;
@@ -437,7 +437,7 @@ footer{
   }
   
   .btn-primary{
-    padding:10px 12px;
+    padding:10px 30px;
     font-size:13px;
     width:100%;
   }

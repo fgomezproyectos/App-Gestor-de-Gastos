@@ -4,12 +4,14 @@
   <meta charset="utf-8">
   <title>Modificar gasto — Gestor de gastos</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icono.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icono.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
   <header>
     <div class="brand">
-      <div class="logo">G</div>
+      <img src="{{ url_for('static', filename='images/icono.png') }}" alt="Logo" style="width:44px;height:44px;object-fit:cover;border-radius:10px">
       <div>
         <div style="font-weight:800">Gestor de gastos</div>
         <div style="font-size:13px;color:var(--muted)">Tus gastos personales</div>
@@ -59,6 +61,6 @@
     </div>
   </main>
 
-  <footer>Hecho para uso local · Gestor de gastos</footer>
+  <footer>Gestor de gastos</footer>
 </body>
 </html>

@@ -4,11 +4,16 @@
   <meta charset="utf-8">
   <title>Iniciar sesión — Gestor de gastos</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icono.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icono.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
   <div class="center">
     <div class="card-auth" role="main" aria-labelledby="login-title">
+      <div style="text-align:center;margin-bottom:16px">
+        <img src="{{ url_for('static', filename='images/icono.png') }}" alt="Logo Gestor" style="width:84px;height:84px;object-fit:contain">
+      </div>
       <h1 id="login-title">Iniciar sesión</h1>
       <p class="lead">Accede a tu panel de gastos</p>
 
@@ -37,7 +42,6 @@
         </div>
 
         <div class="foot">
-          <span class="muted">Proyecto local</span>
           <a class="link" href="{{ url_for('register') }}">¿Sin cuenta?</a>
         </div>
       </form>
