@@ -156,41 +156,54 @@ def index():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        user = session['user']
+        user = session.get('user')
+        print(f"DEBUG INDEX: usuario={user}")
 
         if request.method == 'POST':
-            descripcion = request.form.get('descripcion')
-            monto_str = request.form.get('monto')
+            descripcion = request.form.get('descripcion', '').strip()
+            monto_str = request.form.get('monto', '').strip()
+            print(f"DEBUG POST: descripcion='{descripcion}', monto='{monto_str}'")
             if descripcion and monto_str:
                 try:
                     monto_float = float(monto_str)
                     cursor.execute("INSERT INTO gastos (descripcion, monto, username) VALUES (%s, %s, %s)",
                                    (descripcion, monto_float, user))
                     conn.commit()
-                except ValueError:
-                    print("Error: monto no válido:", monto_str)
+                    print(f"DEBUG: gasto insertado para user='{user}'")
+                except ValueError as ve:
+                    print("Error: monto no válido:", monto_str, ve)
                 except Exception as e:
                     print("Error insert gasto:", str(e))
+                    traceback.print_exc()
             conn.close()
             return redirect(url_for('index'))
 
+        # GET - Recuperar gastos
         cursor.execute("SELECT id, descripcion, monto, fecha_creacion FROM gastos WHERE username = %s ORDER BY id DESC", (user,))
         raw_gastos = cursor.fetchall()
+        print(f"DEBUG: gastos encontrados para user='{user}': {len(raw_gastos) if raw_gastos else 0}")
+        
+        if raw_gastos:
+            for i, row in enumerate(raw_gastos):
+                print(f"  Gasto {i}: id={row[0]}, desc='{row[1]}', monto={row[2]}, fecha={row[3]}")
 
         gastos = []
         total = 0.0
-        for row in raw_gastos:
-            fecha_formateada = row[3].strftime('%Y-%m-%d %H:%M') if row[3] else 'N/A'
-            gasto = {'id': row[0], 'descripcion': row[1], 'monto': float(row[2]), 'fecha': fecha_formateada}
-            gastos.append(gasto)
-            total += gasto['monto']
+        if raw_gastos:
+            for row in raw_gastos:
+                fecha_formateada = row[3].strftime('%Y-%m-%d %H:%M') if row[3] else 'N/A'
+                gasto = {'id': row[0], 'descripcion': row[1], 'monto': float(row[2]), 'fecha': fecha_formateada}
+                gastos.append(gasto)
+                total += gasto['monto']
 
+        print(f"DEBUG: gastos procesados={len(gastos)}, total={total}")
         conn.close()
         return render_template('index.html', gastos=gastos, total=total, user=user)
     except Exception as e:
         print("ERROR INDEX:", str(e))
         traceback.print_exc()
         flash('Error interno en el servidor.')
+        conn.close()
         return render_template('index.html', gastos=[], total=0.0, user=session.get('user'))
 
 @app.route('/modificar/<int:id>', methods=('GET', 'POST'))
@@ -199,14 +212,15 @@ def modificar(id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        user = session['user']
+        user = session.get('user')
 
         cursor.execute('SELECT id, descripcion, monto, fecha_creacion FROM gastos WHERE id = %s AND username = %s', (id, user))
         raw_gasto = cursor.fetchone()
 
         if raw_gasto is None:
             conn.close()
-            return "Gasto no encontrado o sin permiso", 404
+            flash('Gasto no encontrado o sin permiso.')
+            return redirect(url_for('index'))
 
         gasto = {
             'id': raw_gasto[0],
@@ -219,8 +233,8 @@ def modificar(id):
             conn.close()
             return render_template('modificar.html', gasto=gasto)
 
-        descripcion = request.form['descripcion']
-        monto_str = request.form['monto']
+        descripcion = request.form.get('descripcion', '').strip()
+        monto_str = request.form.get('monto', '').strip()
         try:
             monto_float = float(monto_str)
             cursor.execute('UPDATE gastos SET descripcion = %s, monto = %s WHERE id = %s AND username = %s',
@@ -235,6 +249,10 @@ def modificar(id):
         print("ERROR modificar:", str(e))
         traceback.print_exc()
         flash('Error interno en el servidor.')
+        try:
+            conn.close()
+        except:
+            pass
         return redirect(url_for('index'))
 
 @app.route('/eliminar/<int:id>', methods=('POST',))
@@ -243,7 +261,7 @@ def eliminar(id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        user = session['user']
+        user = session.get('user')
         cursor.execute("DELETE FROM gastos WHERE id = %s AND username = %s", (id, user))
         conn.commit()
         conn.close()
@@ -252,6 +270,10 @@ def eliminar(id):
         print("ERROR eliminar:", str(e))
         traceback.print_exc()
         flash('Error interno en el servidor.')
+        try:
+            conn.close()
+        except:
+            pass
         return redirect(url_for('index'))
 
 # Error handler (log)
