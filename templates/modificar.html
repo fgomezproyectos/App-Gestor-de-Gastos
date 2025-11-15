@@ -40,9 +40,14 @@
             <input id="descripcion" name="descripcion" type="text" value="{{ gasto.descripcion }}" required>
           </div>
 
-          <div style="margin-bottom:20px">
+          <div style="margin-bottom:16px">
             <label for="monto">Monto (€)</label>
             <input id="monto" name="monto" type="text" inputmode="decimal" value="{{ "%.2f"|format(gasto.monto) }}" required placeholder="0.00">
+          </div>
+
+          <div style="margin-bottom:20px">
+            <label for="fecha">Fecha</label>
+            <input id="fecha" name="fecha" type="datetime-local" value="{{ gasto.fecha_iso }}" required>
           </div>
 
           <div style="display:flex;gap:10px;justify-content:flex-end">

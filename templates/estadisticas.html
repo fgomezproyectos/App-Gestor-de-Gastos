@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Estadísticas — Gestor de gastos</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icono.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icono.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="{{ url_for('static', filename='images/icono.png') }}" alt="Logo" style="width:44px;height:44px;object-fit:cover;border-radius:10px">
+      <div>
+        <div style="font-weight:800">Gestor de gastos</div>
+        <div style="font-size:13px;color:var(--muted)">Estadísticas</div>
+      </div>
+    </div>
+    <div class="user-actions">
+      <a class="link" href="{{ url_for('index') }}">← Volver</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div style="max-width:1200px;margin:0 auto">
+      <div class="card" style="margin-bottom:20px">
+        <h1 style="margin:0 0 8px">Estadísticas de gastos</h1>
+        <p class="muted" style="margin:0 0 20px">Visualiza tus gastos por mes</p>
+      </div>
+
+      {% if totales_por_mes|length > 0 %}
+      <!-- Gráfica por mes -->
+      <div class="card" style="margin-bottom:20px">
+        <h2 style="margin:0 0 16px;font-size:16px">Gastos por mes</h2>
+        <div style="position:relative;height:350px">
+          <canvas id="chartMes"></canvas>
+        </div>
+      </div>
+
+      <!-- Resumen mensual en tabla -->
+      <div class="card">
+        <h2 style="margin:0 0 16px;font-size:16px">Desglose por mes</h2>
+        <table style="width:100%;font-size:14px">
+          <thead>
+            <tr>
+              <th>Mes</th>
+              <th>Total (€)</th>
+              <th>Gastos</th>
+              <th>Promedio</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for mes in resumen_meses %}
+            <tr>
+              <td><strong>{{ mes.mes }}</strong></td>
+              <td>{{ "%.2f"|format(mes.total) }}</td>
+              <td>{{ mes.cantidad }}</td>
+              <td>{{ "%.2f"|format(mes.promedio) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="card" style="text-align:center;padding:40px">
+        <p class="muted" style="font-size:16px">Aún no tienes gastos registrados.</p>
+        <p style="margin-top:12px">
+          <a href="{{ url_for('index') }}" class="link">Vuelve al inicio para añadir gastos</a>
+        </p>
+      </div>
+      {% endif %}
+    </div>
+  </main>
+
+  <footer>Hecho para uso local · Gestor de gastos</footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Datos desde Flask
+      const datosGraficas = {
+        meses: {{ meses_labels|tojson }},
+        totalesPorMes: {{ totales_por_mes|tojson }}
+      };
+
+      console.log('Datos gráficas:', datosGraficas);
+
+      // Solo renderizar si hay datos
+      if (datosGraficas.totalesPorMes && datosGraficas.totalesPorMes.length > 0) {
+        // Gráfica por mes (barras)
+        try {
+          const ctxMes = document.getElementById('chartMes');
+          if (ctxMes) {
+            new Chart(ctxMes, {
+              type: 'bar',
+              data: {
+                labels: datosGraficas.meses,
+                datasets: [{
+                  label: 'Total por mes (€)',
+                  data: datosGraficas.totalesPorMes,
+                  backgroundColor: 'rgba(37, 99, 235, 0.6)',
+                  borderColor: 'rgba(37, 99, 235, 1)',
+                  borderWidth: 2,
+                  borderRadius: 8
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: true }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      callback: function(value) {
+                        return value + '€';
+                      }
+                    }
+                  }
+                }
+              }
+            });
+          }
+        } catch (e) {
+          console.error('Error al renderizar gráfica de meses:', e);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

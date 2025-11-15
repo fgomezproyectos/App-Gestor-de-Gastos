@@ -344,6 +344,50 @@ footer{
   padding-right:18px;
 }
 
+/* Botón estadísticas */
+.btn-estadisticas{
+  display:block;
+  text-align:center;
+  padding:12px;
+  background:var(--accent);
+  color:#fff;
+  border-radius:8px;
+  text-decoration:none;
+  font-weight:700;
+  cursor:pointer;
+  border:none;
+  font-size:14px;
+  transition:background-color 0.2s;
+}
+
+.btn-estadisticas:hover{
+  background:#1d4ed8;
+  text-decoration:none;
+}
+
+/* Input datetime-local */
+input[type="datetime-local"]{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid #e6eef7;
+  border-radius:8px;
+  font-size:14px;
+  font-family:inherit;
+  background:#fbfdff;
+  color:#1f2937;
+  box-sizing:border-box;
+}
+
+input[type="datetime-local"]:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(37,99,235,0.08);
+}
+
+input[type="datetime-local"]::placeholder{
+  color:#9ca3af;
+}
+
 /* RESPONSIVE BREAKPOINTS */
 
 /* Tablet (768px y mayores) */

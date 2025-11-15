@@ -2,10 +2,11 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import os
 import psycopg2
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 import functools
 from werkzeug.security import generate_password_hash, check_password_hash
 import traceback
+from collections import defaultdict
 
 # Carga las variables de entorno (solo para desarrollo local)
 load_dotenv()
@@ -55,10 +56,9 @@ def inicializar_bd():
                 descripcion TEXT NOT NULL,
                 monto NUMERIC(10, 2) NOT NULL,
                 fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                username TEXT
+                username TEXT NOT NULL
             );
         """)
-        cursor.execute("ALTER TABLE gastos ADD COLUMN IF NOT EXISTS username TEXT;")
         try:
             cursor.execute("""
                 ALTER TABLE gastos
@@ -179,7 +179,7 @@ def index():
             return redirect(url_for('index'))
 
         # GET - Recuperar gastos
-        cursor.execute("SELECT id, descripcion, monto, fecha_creacion FROM gastos WHERE username = %s ORDER BY id DESC", (user,))
+        cursor.execute("SELECT id, descripcion, monto, fecha_creacion FROM gastos WHERE username = %s ORDER BY fecha_creacion DESC", (user,))
         raw_gastos = cursor.fetchall()
         print(f"DEBUG: gastos encontrados para user='{user}': {len(raw_gastos) if raw_gastos else 0}")
         
@@ -203,7 +203,10 @@ def index():
         print("ERROR INDEX:", str(e))
         traceback.print_exc()
         flash('Error interno en el servidor.')
-        conn.close()
+        try:
+            conn.close()
+        except:
+            pass
         return render_template('index.html', gastos=[], total=0.0, user=session.get('user'))
 
 @app.route('/modificar/<int:id>', methods=('GET', 'POST'))
@@ -226,7 +229,8 @@ def modificar(id):
             'id': raw_gasto[0],
             'descripcion': raw_gasto[1],
             'monto': float(raw_gasto[2]),
-            'fecha': raw_gasto[3].strftime('%Y-%m-%d %H:%M') if raw_gasto[3] else 'N/A'
+            'fecha': raw_gasto[3].strftime('%Y-%m-%d %H:%M') if raw_gasto[3] else 'N/A',
+            'fecha_iso': raw_gasto[3].strftime('%Y-%m-%dT%H:%M') if raw_gasto[3] else ''
         }
 
         if request.method == 'GET':
@@ -235,16 +239,21 @@ def modificar(id):
 
         descripcion = request.form.get('descripcion', '').strip()
         monto_str = request.form.get('monto', '').strip()
+        fecha_str = request.form.get('fecha', '')
+        
         try:
             monto_float = float(monto_str)
-            cursor.execute('UPDATE gastos SET descripcion = %s, monto = %s WHERE id = %s AND username = %s',
-                           (descripcion, monto_float, id, user))
+            # Convertir fecha de formato datetime-local a datetime
+            fecha_obj = datetime.strptime(fecha_str, '%Y-%m-%dT%H:%M') if fecha_str else None
+            
+            cursor.execute('UPDATE gastos SET descripcion = %s, monto = %s, fecha_creacion = %s WHERE id = %s AND username = %s',
+                           (descripcion, monto_float, fecha_obj, id, user))
             conn.commit()
             conn.close()
             return redirect(url_for('index'))
-        except ValueError:
+        except ValueError as ve:
             conn.close()
-            return render_template('modificar.html', gasto=gasto, error="Monto inválido.")
+            return render_template('modificar.html', gasto=gasto, error="Monto o fecha inválidos.")
     except Exception as e:
         print("ERROR modificar:", str(e))
         traceback.print_exc()
@@ -274,6 +283,77 @@ def eliminar(id):
             conn.close()
         except:
             pass
+        return redirect(url_for('index'))
+
+@app.route('/estadisticas')
+@login_required
+def estadisticas():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        user = session.get('user')
+        
+        # Obtener todos los gastos del usuario
+        cursor.execute(
+            "SELECT descripcion, monto, fecha_creacion FROM gastos WHERE username = %s ORDER BY fecha_creacion DESC",
+            (user,)
+        )
+        raw_gastos = cursor.fetchall()
+        conn.close()
+        
+        # Procesar datos para gráficas
+        gastos_por_mes = defaultdict(float)
+        gastos_por_descripcion = defaultdict(float)
+        gastos_por_mes_detalle = defaultdict(lambda: {'total': 0, 'cantidad': 0})
+        
+        for row in raw_gastos:
+            descripcion = row[0]
+            monto = float(row[1])
+            fecha = row[2]
+            
+            # Clave mes (ej: "2025-11")
+            mes_key = fecha.strftime('%Y-%m')
+            mes_label = fecha.strftime('%B %Y')  # Ej: "November 2025"
+            
+            gastos_por_mes[mes_key] = gastos_por_mes.get(mes_key, 0) + monto
+            gastos_por_mes_detalle[mes_key]['total'] += monto
+            gastos_por_mes_detalle[mes_key]['cantidad'] += 1
+            gastos_por_descripcion[descripcion] += monto
+        
+        # Preparar datos para Chart.js
+        meses_ordenados = sorted(gastos_por_mes.keys(), reverse=True)[:12]  # Últimos 12 meses
+        meses_labels = [datetime.strptime(m, '%Y-%m').strftime('%b %Y') for m in meses_ordenados]
+        totales_por_mes = [gastos_por_mes.get(m, 0) for m in meses_ordenados]
+        
+        # Top 8 descripciones
+        top_descripciones = sorted(gastos_por_descripcion.items(), key=lambda x: x[1], reverse=True)[:8]
+        descripciones_labels = [d[0] for d in top_descripciones]
+        totales_por_descripcion = [float(d[1]) for d in top_descripciones]
+        
+        # Resumen detallado por mes
+        resumen_meses = []
+        for mes in meses_ordenados:
+            detalle = gastos_por_mes_detalle[mes]
+            resumen_meses.append({
+                'mes': datetime.strptime(mes, '%Y-%m').strftime('%B %Y'),
+                'total': detalle['total'],
+                'cantidad': detalle['cantidad'],
+                'promedio': detalle['total'] / detalle['cantidad'] if detalle['cantidad'] > 0 else 0
+            })
+        
+        return render_template(
+            'estadisticas.html',
+            meses_labels=meses_labels,
+            totales_por_mes=totales_por_mes,
+            descripciones_labels=descripciones_labels,
+            totales_por_descripcion=totales_por_descripcion,
+            resumen_meses=resumen_meses,
+            user=user
+        )
+    except Exception as e:
+        print("ERROR ESTADISTICAS:", str(e))
+        traceback.print_exc()
+        flash('Error al cargar estadísticas.')
         return redirect(url_for('index'))
 
 # Error handler (log)
