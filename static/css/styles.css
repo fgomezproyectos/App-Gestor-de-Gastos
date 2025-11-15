@@ -1,0 +1,568 @@
+/* CSS centralizado para login, register e index - Fully Responsive */
+:root{
+  --bg:#f4f6fb;
+  --bg-soft:#f6f8fa;
+  --card:#ffffff;
+  --accent:#2563eb;
+  --accent-2:#06b6d4;
+  --accent-alt:#3b82f6;
+  --accent-success:#10b981;
+  --muted:#6b7280;
+  --danger:#ef4444;
+  --radius:10px;
+  --shadow:0 12px 30px rgba(2,6,23,0.08);
+  --shadow-soft:0 8px 24px rgba(15,23,42,0.08);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Helvetica Neue";
+}
+
+/* Base */
+* { box-sizing: border-box; }
+html,body{
+  height:100%;
+  margin:0;
+  background:linear-gradient(180deg,#eef2ff 0%,var(--bg) 100%);
+  color:#0b1220;
+  -webkit-font-smoothing:antialiased;
+  font-size:16px;
+}
+
+body { overflow-x: hidden; }
+
+/* Container */
+.container{
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 18px;
+  box-sizing:border-box;
+}
+
+/* Cards & layout */
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px;
+}
+
+.small-card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-soft);
+  padding:14px;
+}
+
+/* Header / Brand */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 18px;
+  max-width:1100px;
+  margin:18px auto;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex:1;
+  min-width:200px;
+}
+
+.logo{
+  width:44px;
+  height:44px;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-weight:700;
+  flex-shrink:0;
+}
+
+.user-actions{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  font-size:14px;
+}
+
+a.link{
+  color:var(--accent);
+  text-decoration:none;
+  font-weight:700;
+}
+
+/* Forms */
+label{
+  display:block;
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:6px;
+  font-weight:500;
+}
+
+input[type=text], input[type=password], input[type=number], textarea{
+  width:100%;
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid #e6eef7;
+  background:#fbfdff;
+  font-size:16px;
+  box-sizing:border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input:focus, textarea:focus{
+  outline:none;
+  box-shadow:0 0 0 3px rgba(37,99,235,0.08);
+  border-color:var(--accent);
+}
+
+.btn-primary{
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  padding:10px 16px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:700;
+  font-size:14px;
+  transition: background 0.2s;
+  white-space:nowrap;
+}
+
+.btn-primary:hover{
+  background:#1e40af;
+}
+
+.btn-primary:active{
+  transform: scale(0.98);
+}
+
+.btn-danger{
+  background:transparent;
+  border:1px solid var(--danger);
+  color:var(--danger);
+  padding:8px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:13px;
+  transition: all 0.2s;
+}
+
+.btn-danger:hover{
+  background:#fff4f4;
+}
+
+/* Login / Register specific */
+.center{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px 18px;
+}
+
+.card-auth{
+  width:100%;
+  max-width:480px;
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-soft);
+  padding:28px;
+}
+
+h1{
+  margin:0 0 8px;
+  font-size:24px;
+  word-break: break-word;
+}
+
+h2{
+  font-size:18px;
+  margin:0 0 12px;
+}
+
+h3{
+  font-size:16px;
+  margin:0 0 12px;
+}
+
+h4{
+  font-size:14px;
+  margin:0 0 10px;
+  font-weight:700;
+}
+
+p.lead{
+  margin:0 0 18px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.5;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.muted{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.foot{
+  margin-top:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.flash{
+  background:#fff8e6;
+  border:1px solid #ffecb5;
+  color:#92400e;
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:12px;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.flash ul{
+  margin:0;
+  padding-left:18px;
+}
+
+.flash-error{
+  background:#fff4f4;
+  border:1px solid #ffdada;
+  color:var(--danger);
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:12px;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.flash-error ul{
+  margin:0;
+  padding-left:18px;
+}
+
+/* Table / list - Mobile first */
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+
+th,td{
+  padding:12px 10px;
+  text-align:left;
+  border-bottom:1px solid #f0f3f8;
+  font-size:14px;
+}
+
+th{
+  color:var(--muted);
+  font-weight:600;
+  font-size:13px;
+}
+
+td{
+  word-break: break-word;
+}
+
+.actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.actions a, .actions form{
+  display:inline-block;
+}
+
+/* List card for mobile */
+.list-card{
+  display:none;
+}
+
+.list-item{
+  background:#fff;
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:12px;
+  box-shadow:0 4px 12px rgba(2,6,23,0.04);
+  border:1px solid #f0f3f8;
+}
+
+.list-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+
+.meta{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:4px;
+}
+
+.total{
+  font-weight:800;
+  font-size:16px;
+  color:#081124;
+  padding:12px 0;
+  text-align:right;
+  margin-top:16px;
+}
+
+/* Footer */
+footer{
+  max-width:1100px;
+  margin:24px auto 18px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  padding-bottom:24px;
+  padding-left:18px;
+  padding-right:18px;
+}
+
+/* RESPONSIVE BREAKPOINTS */
+
+/* Tablet (768px y mayores) */
+@media (min-width:768px){
+  .container{
+    padding:0 24px;
+  }
+  
+  header{
+    padding:24px 28px;
+  }
+  
+  .card-auth{
+    padding:32px;
+  }
+  
+  h1{
+    font-size:28px;
+  }
+  
+  .brand > div > div:first-child{
+    font-size:18px;
+  }
+}
+
+/* Mobile (máximo 767px) - Optimizado */
+@media (max-width:767px){
+  body{
+    font-size:15px;
+  }
+  
+  .container{
+    padding:0 16px;
+  }
+  
+  header{
+    padding:16px;
+    margin:12px auto;
+  }
+  
+  .brand{
+    width:100%;
+    margin-bottom:8px;
+  }
+  
+  .brand > div > div:first-child{
+    font-size:16px;
+    font-weight:700;
+  }
+  
+  .brand > div > div:last-child{
+    font-size:12px;
+  }
+  
+  .user-actions{
+    width:100%;
+    justify-content:space-between;
+    font-size:13px;
+  }
+  
+  .card{
+    padding:14px;
+    margin-bottom:12px;
+  }
+  
+  .card-auth{
+    padding:20px;
+    margin:20px auto;
+  }
+  
+  h1{
+    font-size:20px;
+  }
+  
+  h2{
+    font-size:16px;
+  }
+  
+  p.lead{
+    font-size:13px;
+    margin-bottom:14px;
+  }
+  
+  label{
+    font-size:12px;
+  }
+  
+  input[type=text], input[type=password], input[type=number], textarea{
+    padding:10px;
+    font-size:16px;
+  }
+  
+  .btn-primary{
+    padding:10px 12px;
+    font-size:13px;
+    width:100%;
+  }
+  
+  .btn-danger{
+    padding:8px;
+    font-size:12px;
+  }
+  
+  /* Grid responsivo */
+  .grid{
+    grid-template-columns:1fr !important;
+  }
+  
+  /* Ocultar tabla en mobile, mostrar cards */
+  table{
+    display:none;
+  }
+  
+  .list-card{
+    display:block;
+  }
+  
+  /* Form grid mobile */
+  .add-form > div{
+    grid-template-columns:1fr !important;
+    gap:8px !important;
+  }
+  
+  .actions{
+    flex-direction:column;
+    gap:4px;
+  }
+  
+  .actions a, .actions button{
+    width:100%;
+    text-align:center;
+    padding:8px 6px;
+  }
+  
+  /* Sticky sidebar mobile */
+  aside{
+    position:static !important;
+  }
+  
+  .total{
+    text-align:center;
+    font-size:14px;
+  }
+  
+  .foot{
+    flex-direction:column;
+    justify-content:center;
+    text-align:center;
+  }
+  
+  .flash, .flash-error{
+    padding:10px;
+    font-size:12px;
+  }
+}
+
+/* Ultra mobile (máximo 480px) */
+@media (max-width:480px){
+  .container{
+    padding:0 12px;
+  }
+  
+  header{
+    padding:12px;
+    gap:8px;
+  }
+  
+  .logo{
+    width:40px;
+    height:40px;
+    font-size:14px;
+  }
+  
+  .brand > div > div:first-child{
+    font-size:14px;
+  }
+  
+  h1{
+    font-size:18px;
+  }
+  
+  h2{
+    font-size:14px;
+  }
+  
+  .btn-primary, .btn-danger{
+    font-size:12px;
+    padding:8px 10px;
+  }
+  
+  .card-auth{
+    padding:16px;
+  }
+  
+  .list-item{
+    padding:10px;
+  }
+  
+  .list-row{
+    gap:8px;
+  }
+  
+  .total{
+    font-size:13px;
+  }
+}
+
+/* Landscape mode (altura limitada) */
+@media (max-height:500px) and (orientation:landscape){
+  header{
+    padding:12px 18px;
+  }
+  
+  .card{
+    padding:12px;
+  }
+  
+  .center{
+    min-height:auto;
+    padding:12px;
+  }
+}

@@ -1,268 +1,125 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor de Gastos - Dashboard</title>
-    <style>
-        :root {
-            --primary-color: #007bff;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --bg-light: #f8f9fa;
-            --bg-dark: #343a40;
-            --text-dark: #212529;
-            --text-light: #f8f9fa;
-            --card-bg: white;
-            --border-radius: 8px;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            display: flex;
-        }
-
-        /* Contenedor Principal */
-        .dashboard {
-            display: flex;
-            width: 100%;
-            min-height: 100vh;
-        }
-
-        /* Barra Lateral (Formulario y Análisis) */
-        .sidebar {
-            width: 300px;
-            padding: 20px;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar h2, .sidebar h1 {
-            border-bottom: 2px solid var(--secondary-color);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-
-        .sidebar label {
-            display: block;
-            margin-top: 10px;
-            font-weight: 600;
-        }
-
-        .sidebar input[type="text"], 
-        .sidebar input[type="number"], 
-        .sidebar button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-            border-radius: var(--border-radius);
-            border: 1px solid #ccc;
-            box-sizing: border-box; /* Importante para que el padding no desborde */
-        }
-
-        .sidebar button {
-            background-color: var(--success-color);
-            color: white;
-            cursor: pointer;
-            border: none;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-
-        .sidebar button:hover {
-            background-color: #1e7e34;
-        }
-
-        /* Contenido Principal (Tabla) */
-        .main-content {
-            flex-grow: 1;
-            padding: 40px;
-        }
-
-        .main-content h1 {
-            color: var(--primary-color);
-            margin-bottom: 30px;
-        }
-
-        /* Tarjeta de Total */
-        .total-card {
-            background-color: var(--primary-color);
-            color: var(--text-light);
-            padding: 20px;
-            border-radius: var(--border-radius);
-            margin-bottom: 30px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .total-card span {
-            font-size: 2.5em;
-            font-weight: bold;
-            display: block;
-            margin-top: 5px;
-        }
-
-        /* Estilo de la Tabla */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: var(--card-bg);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        th {
-            background-color: var(--secondary-color);
-            color: var(--text-light);
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        tr:hover {
-            background-color: #e9ecef;
-        }
-
-        /* Botones de Acción */
-        .btn-modificar, .btn-eliminar {
-            padding: 5px 10px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 14px;
-            cursor: pointer;
-            display: inline-block;
-            transition: background-color 0.3s;
-        }
-
-        .btn-modificar {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-        }
-
-        .btn-modificar:hover {
-            background-color: #0056b3;
-        }
-
-        .btn-eliminar {
-            background-color: var(--danger-color);
-            color: white;
-            border: none;
-            margin-left: 5px;
-        }
-
-        .btn-eliminar:hover {
-            background-color: #bd2130;
-        }
-        
-        /* Aseguramos que el formulario de eliminar sea inline */
-        .action-form {
-            display: inline-block;
-            margin: 0;
-            padding: 0;
-        }
-        
-        /* Estilos para el Análisis Rápido */
-        .analysis-card {
-            background-color: var(--card-bg);
-            color: var(--text-dark);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        .analysis-card p {
-            margin: 5px 0;
-        }
-
-    </style>
+  <meta charset="utf-8">
+  <title>Gestor de gastos</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <div class="dashboard">
-        
-        <div class="sidebar">
-            <h1>Gestor de Gastos</h1>
-
-            <h2>💰 Nuevo Gasto</h2>
-            <form method="post">
-                <label for="descripcion">Descripción</label>
-                <input type="text" name="descripcion" placeholder="Ej: Café, Transporte..." required>
-                
-                <label for="monto">Monto ($)</label>
-                <input type="number" name="monto" step="0.01" placeholder="Ej: 5.50" required>
-                
-                <button type="submit">Añadir Gasto</button>
-            </form>
-
-            <hr style="border-color: var(--secondary-color);">
-
-            <h2>🚀 Análisis Rápido</h2>
-            <div class="analysis-card">
-                {% if total is defined %}
-                <p>Total Registrado: <strong>${{ "%.2f" | format(total) }}</strong></p>
-                {% else %}
-                <p>Añade gastos para ver las estadísticas.</p>
-                {% endif %}
-            </div>
-
-        </div>
-
-        <div class="main-content">
-            <h1>📊 Resumen de Transacciones</h1>
-
-            {% if total is defined %}
-            <div class="total-card">
-                Total Gastado: 
-                <span>${{ "%.2f" | format(total) }}</span>
-            </div>
-            {% endif %}
-
-            {% if gastos %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fecha</th> <!-- ⬅️ NUEVA COLUMNA -->
-                        <th>ID</th>
-                        <th>Descripción</th>
-                        <th>Monto</th>
-                        <th>Acciones</th> 
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for gasto in gastos %}
-                    <tr>
-                        <td>{{ gasto['fecha'] }}</td> <!-- ⬅️ NUEVO CAMPO -->
-                        <td>{{ gasto['id'] }}</td>
-                        <td>{{ gasto['descripcion'] }}</td>
-                        <td>${{ "%.2f" | format(gasto['monto']) }}</td>
-                        <td>
-                            <a href="{{ url_for('modificar', id=gasto['id']) }}" class="btn-modificar">Modificar</a>
-                            
-                            <form method="POST" action="{{ url_for('eliminar', id=gasto['id']) }}" class="action-form">
-                                <input type="submit" value="Eliminar" class="btn-eliminar" onclick="return confirm('¿Estás seguro de que quieres eliminar este gasto?');">
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p>💡 ¡Tu lista de gastos está vacía! Usa el formulario lateral para empezar.</p>
-            {% endif %}
-        </div>
+  <header>
+    <div class="brand">
+      <div class="logo">G</div>
+      <div>
+        <div style="font-weight:800">Gestor de gastos</div>
+        <div style="font-size:13px;color:var(--muted)">Tus gastos personales</div>
+      </div>
     </div>
+    <div class="user-actions">
+      <div class="muted">Conectado: <strong>{{ user }}</strong></div>
+      <a class="link" href="{{ url_for('logout') }}">Cerrar sesión</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid" style="display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start">
+      <section>
+        <div class="card" aria-labelledby="add-heading" style="margin-bottom:18px">
+          <h2 id="add-heading" style="margin:0 0 8px">Añadir gasto</h2>
+          <p class="muted" style="margin:0 0 12px">Anota tus gastos para llevar control.</p>
+          <form class="add-form" method="post" action="{{ url_for('index') }}">
+            <div style="display:grid;grid-template-columns:1fr 140px;gap:10px">
+              <div>
+                <label for="descripcion">Descripción</label>
+                <input id="descripcion" name="descripcion" type="text" required>
+              </div>
+              <div>
+                <label for="monto">Monto (€)</label>
+                <input id="monto" name="monto" type="text" inputmode="decimal" required placeholder="0.00">
+              </div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:10px;justify-content:flex-end">
+              <button class="btn-primary" type="submit">Agregar gasto</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 12px">Mis gastos</h3>
+
+          {% if gastos %}
+          <table role="table" aria-label="Lista de gastos">
+            <thead>
+              <tr><th>Descripción</th><th>Monto</th><th>Fecha</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+              {% for g in gastos %}
+              <tr>
+                <td style="max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.descripcion }}</td>
+                <td>{{ "%.2f"|format(g.monto) }} €</td>
+                <td>{{ g.fecha }}</td>
+                <td class="actions">
+                  <a href="{{ url_for('modificar', id=g.id) }}" class="muted">Editar</a>
+                  <form method="post" action="{{ url_for('eliminar', id=g.id) }}" style="display:inline" onsubmit="return confirm('¿Eliminar gasto?');">
+                    <button type="submit" class="btn-danger">Eliminar</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <div class="list-card" aria-hidden="false">
+            {% for g in gastos %}
+            <div class="list-item">
+              <div class="list-row">
+                <div>
+                  <div style="font-weight:700">{{ g.descripcion }}</div>
+                  <div class="meta">{{ g.fecha }}</div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-weight:800">{{ "%.2f"|format(g.monto) }} €</div>
+                  <div style="margin-top:8px">
+                    <a class="muted" href="{{ url_for('modificar', id=g.id) }}" style="margin-right:8px">Editar</a>
+                    <form method="post" action="{{ url_for('eliminar', id=g.id) }}" style="display:inline" onsubmit="return confirm('¿Eliminar gasto?');">
+                      <button type="button" onclick="this.closest('form').submit()" style="background:none;border:none;color:var(--danger);font-weight:700;cursor:pointer">Eliminar</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="total">Total: {{ "%.2f"|format(total) }} €</div>
+
+          {% else %}
+            <p class="muted">Aún no tienes gastos. Añade el primero arriba.</p>
+          {% endif %}
+        </div>
+      </section>
+
+      <aside>
+        <div class="card" style="position:sticky;top:20px">
+          <h4 style="margin:0 0 8px">Resumen</h4>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between"><span class="muted">Gastos</span><strong>{{ gastos|length }}</strong></div>
+            <div style="display:flex;justify-content:space-between"><span class="muted">Total</span><strong>{{ "%.2f"|format(total) }} €</strong></div>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <!--<div class="card">
+          <h4 style="margin:0 0 8px">Cuenta</h4>
+          <div class="muted">Usuario:</div>
+          <div style="font-weight:700;margin-bottom:8px">{{ user }}</div>
+          <a class="link" href="{{ url_for('logout') }}">Cerrar sesión</a>
+        </div>-->
+      </aside>
+    </div>
+  </main>
+
+  <footer>Gestor de gastos</footer>
 </body>
 </html>

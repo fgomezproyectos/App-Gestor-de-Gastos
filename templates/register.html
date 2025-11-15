@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Registrar — Gestor de gastos</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <div class="center">
+    <div class="card-auth" role="main" aria-labelledby="reg-title">
+      <h1 id="reg-title">Crear cuenta</h1>
+      <p class="lead">Registra un usuario para trabajar en local</p>
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="flash" role="alert">
+            <ul style="margin:0;padding-left:18px">
+              {% for msg in messages %}<li>{{ msg }}</li>{% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form method="post" novalidate>
+        <div style="margin-bottom:12px">
+          <label for="username">Usuario</label>
+          <input id="username" name="username" type="text" required>
+        </div>
+        <div style="margin-bottom:16px">
+          <label for="password">Contraseña</label>
+          <input id="password" name="password" type="password" required>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <button class="btn-primary" type="submit">Crear cuenta</button>
+          <a class="muted" href="{{ url_for('login') }}">Volver al inicio</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
