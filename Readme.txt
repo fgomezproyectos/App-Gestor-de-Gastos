@@ -33,7 +33,7 @@ docker run --name local-postgres -e POSTGRES_USER=myuser -e POSTGRES_PASSWORD=my
 
 Crea el entorno virtual e instala las librerías (usando requirements.txt):
 
-python3 -m venv venv 
+python --version 
 source venv/bin/activate  # o .\venv\Scripts\activate en Windows
 pip install -r requirements.txt 
 

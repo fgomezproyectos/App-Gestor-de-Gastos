@@ -17,7 +17,7 @@
     </div>
     <div class="user-actions">
       <div class="muted">Conectado: <strong>{{ user }}</strong></div>
-      <a class="link" href="{{ url_for('logout') }}">Cerrar sesión</a>
+      <a class="link" href="{{ url_for('auth.logout') }}">Cerrar sesión</a>
     </div>
   </header>
 
@@ -27,7 +27,7 @@
         <div class="card" aria-labelledby="add-heading" style="margin-bottom:18px">
           <h2 id="add-heading" style="margin:0 0 8px">Añadir gasto</h2>
           <p class="muted" style="margin:0 0 12px">Anota tus gastos para llevar control.</p>
-          <form class="add-form" method="post" action="{{ url_for('index') }}">
+          <form class="add-form" method="post" action="{{ url_for('gastos.index') }}">
             <div style="display:grid;grid-template-columns:1fr 140px;gap:10px">
               <div>
                 <label for="descripcion">Descripción</label>
@@ -59,8 +59,8 @@
                 <td>{{ "%.2f"|format(g.monto) }} €</td>
                 <td>{{ g.fecha }}</td>
                 <td class="actions">
-                  <a href="{{ url_for('modificar', id=g.id) }}" class="muted">Editar</a>
-                  <form method="post" action="{{ url_for('eliminar', id=g.id) }}" style="display:inline" onsubmit="return confirm('¿Eliminar gasto?');">
+                  <a href="{{ url_for('gastos.modificar', id=g.id) }}" class="muted">Editar</a>
+                  <form method="post" action="{{ url_for('gastos.eliminar', id=g.id) }}" style="display:inline" onsubmit="return confirm('¿Eliminar gasto?');">
                     <button type="submit" class="btn-danger">Eliminar</button>
                   </form>
                 </td>
@@ -80,8 +80,8 @@
                 <div style="text-align:right">
                   <div style="font-weight:800">{{ "%.2f"|format(g.monto) }} €</div>
                   <div style="margin-top:8px">
-                    <a class="muted" href="{{ url_for('modificar', id=g.id) }}" style="margin-right:8px">Editar</a>
-                    <form method="post" action="{{ url_for('eliminar', id=g.id) }}" style="display:inline" onsubmit="return confirm('¿Eliminar gasto?');">
+                    <a class="muted" href="{{ url_for('gastos.modificar', id=g.id) }}" style="margin-right:8px">Editar</a>
+                    <form method="post" action="{{ url_for('gastos.eliminar', id=g.id) }}" style="display:inline" onsubmit="return confirm('¿Eliminar gasto?');">
                       <button type="button" onclick="this.closest('form').submit()" style="background:none;border:none;color:var(--danger);font-weight:700;cursor:pointer">Eliminar</button>
                     </form>
                   </div>
@@ -114,7 +114,7 @@
           <h4 style="margin:0 0 8px">Cuenta</h4>
           <div class="muted">Usuario:</div>
           <div style="font-weight:700;margin-bottom:8px">{{ user }}</div>
-          <a class="link" href="{{ url_for('logout') }}">Cerrar sesión</a>
+          <a class="link" href="{{ url_for('auth.logout') }}">Cerrar sesión</a>
         </div>-->
       </aside>
     </div>
