@@ -19,7 +19,7 @@
       </div>
     </div>
     <div class="user-actions">
-      <a class="link" href="{{ url_for('index') }}">← Volver</a>
+      <a class="link" href="{{ url_for('gastos.index') }}">← Volver</a>
     </div>
   </header>
 
@@ -67,7 +67,7 @@
       <div class="card" style="text-align:center;padding:40px">
         <p class="muted" style="font-size:16px">Aún no tienes gastos registrados.</p>
         <p style="margin-top:12px">
-          <a href="{{ url_for('index') }}" class="link">Vuelve al inicio para añadir gastos</a>
+          <a href="{{ url_for('gastos.index') }}" class="link">Vuelve al inicio para añadir gastos</a>
         </p>
       </div>
       {% endif %}

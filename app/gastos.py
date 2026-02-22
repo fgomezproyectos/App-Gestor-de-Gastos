@@ -119,3 +119,60 @@ def eliminar(id):
     conn.close()
     
     return redirect(url_for('gastos.index'))
+
+@gastos_bp.route('/estadisticas', methods=('GET',))
+@login_required
+def estadisticas():
+    """Display expense statistics by month."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    user = session['user']
+    
+    # Get all expenses grouped by month
+    cursor.execute("""
+        SELECT DATE_TRUNC('month', fecha_creacion)::date as mes, 
+               SUM(monto) as total, 
+               COUNT(*) as cantidad,
+               AVG(monto) as promedio
+        FROM gastos 
+        WHERE username = %s
+        GROUP BY DATE_TRUNC('month', fecha_creacion)
+        ORDER BY mes DESC
+    """, (user,))
+    
+    resultados = cursor.fetchall()
+    
+    # Process results
+    resumen_meses = []
+    totales_por_mes = []
+    meses_labels = []
+    
+    for row in resultados:
+        mes = row[0]
+        total = float(row[1]) if row[1] else 0.0
+        cantidad = int(row[2])
+        promedio = float(row[3]) if row[3] else 0.0
+        
+        mes_str = mes.strftime('%B %Y') if mes else 'N/A'
+        
+        resumen_meses.append({
+            'mes': mes_str,
+            'total': total,
+            'cantidad': cantidad,
+            'promedio': promedio
+        })
+        
+        totales_por_mes.append(total)
+        meses_labels.append(mes_str)
+    
+    # Reverse to show oldest to newest
+    resumen_meses.reverse()
+    totales_por_mes.reverse()
+    meses_labels.reverse()
+    
+    conn.close()
+    
+    return render_template('estadisticas.html', 
+                          resumen_meses=resumen_meses,
+                          totales_por_mes=totales_por_mes,
+                          meses_labels=meses_labels)
