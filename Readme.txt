@@ -42,7 +42,7 @@ pip install -r requirements.txt
 
 Con Docker activo y el entorno virtual activado, ejecuta la aplicación Flask:
 
-python gestor.py
+python app.py
 
 
 La aplicación estará en http://127.0.0.1:5000/.
